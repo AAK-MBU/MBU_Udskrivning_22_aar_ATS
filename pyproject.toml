@@ -7,9 +7,13 @@ requires-python = ">=3.13"
 dependencies = [
     "automation-server-client @ git+https://github.com/odense-rpa/automation-server-client.git",
     "mbu-dev-shared-components>=3.0.0",
+    "mbu_msoffice_integration>=1.0.1",
     "mbu-rpa-core",
     "pillow",
-    "ruff"
+    "ruff",
+    "pandas",
+    "sqlalchemy >= 2.0.20",
+    "sqlalchemy[asyncio] >= 2.0.20",
 ]
 
 [tool.uv.sources]
