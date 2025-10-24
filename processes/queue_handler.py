@@ -1,8 +1,12 @@
 """Module to hande queue population"""
 
+import sys
 import asyncio
 import json
 import logging
+
+from datetime import date
+from dateutil.relativedelta import relativedelta
 
 from automation_server_client import Workqueue
 
@@ -12,15 +16,24 @@ logger = logging.getLogger(__name__)
 
 
 def retrieve_items_for_queue() -> list[dict]:
-    """Function to populate queue"""
-    data = []
-    references = []
+    """Function to populate queue with items for processing."""
 
-    items = [
-        {"reference": ref, "data": d} for ref, d in zip(references, data, strict=True)
-    ]
+    prefix = (date.today() - relativedelta(years=22)).strftime("%d%m%y")
 
-    return items
+    if "--borger_fyldt_22" not in sys.argv:
+        return []
+
+    # Determine test vs real mode
+    is_test = "--test" in sys.argv
+    cpr_or_prefix = "1110109996" if is_test else prefix
+    reference = f"borger_fyldt_22_{cpr_or_prefix}_test" if is_test else f"borger_fyldt_22_{prefix}"
+
+    item = {
+        "reference": reference,
+        "data": {"todays_date": cpr_or_prefix},
+    }
+
+    return [item]
 
 
 def create_sort_key(item: dict) -> str:
