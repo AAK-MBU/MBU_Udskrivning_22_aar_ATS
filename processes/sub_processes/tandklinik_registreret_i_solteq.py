@@ -31,3 +31,10 @@ def main(item_data: dict, item_reference: dict):
         raise BusinessError("Borgerens ønskede tandklinik er IKKE registreret i Solteq Tand!")
 
     return data, references
+
+
+def finalization():
+
+
+
+    return

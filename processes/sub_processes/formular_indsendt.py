@@ -30,14 +30,15 @@ def main(item_data: dict, item_reference: dict):
     for citizen_submission in citizen_formulars:
         form_data = citizen_submission.get("data")
 
-        if data.get("borger_cpr_nummer_manuelt") == citizen_cpr:
-            if data.get("tandlaege_fremkommer_ikke_i_listen") == "0":
+        if form_data.get("borger_cpr_nummer_manuelt") == citizen_cpr:
+            if form_data.get("tandlaege_fremkommer_ikke_i_listen") == "0":
                 new_clinic_ydernummer = form_data.get("vaelg_tandlaege_api").split("||")[-1].strip()
 
             else:
                 new_clinic_ydernummer = form_data.get("tandlaege_ydernummer_manuelt")
 
-    if new_clinic_ydernummer != "":
+    # if new_clinic_ydernummer != "":
+    if new_clinic_ydernummer == "":
         references.append(citizen_cpr)
         data.append(item_data)
 
@@ -106,3 +107,10 @@ def find_citizen_formulars(cpr: str = "") -> list[dict]:
             print("Invalid JSON in form_data, skipping row.")
 
     return extracted_data
+
+
+def finalization():
+
+
+
+    return

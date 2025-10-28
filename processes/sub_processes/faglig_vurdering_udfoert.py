@@ -9,29 +9,23 @@ from mbu_rpa_core.exceptions import BusinessError
 SOLTEQ_TAND_DB_CONN_STRING = os.getenv("DBCONNECTIONSTRINGSOLTEQTAND")
 
 
+# pylint: disable=unused-argument
 def main(item_data: dict, item_reference: dict):
     """Main function to execute the script."""
-
-    data = []
-    references = []
 
     citizen_cpr = item_reference
 
     db_handler = SolteqTandDatabase(conn_str=SOLTEQ_TAND_DB_CONN_STRING)
 
-    citizen_bookings = find_citizen_aftale(db_handler=db_handler, cpr=citizen_cpr)
+    citizen_bookings = faglig_vurdering_udfoert(db_handler=db_handler, cpr=citizen_cpr)
 
-    if citizen_bookings:
-        references.append(citizen_cpr)
-        data.append(item_data)
+    if not citizen_bookings:
+        raise BusinessError("Faglig vurdering endnu ikke udført")
 
-    else:
-        raise BusinessError("Borger har ikke en aftale med aftaletype 'Z - 22 år - Borger fyldt 22 år'! og aftalestaus '22 år - Afventer faglig vurdering'")
-
-    return data, references
+    return True
 
 
-def find_citizen_aftale(db_handler: SolteqTandDatabase, cpr: str):
+def faglig_vurdering_udfoert(db_handler: SolteqTandDatabase, cpr: str):
     """
     Check if a citizen has a booking with the specified aftaletype and -status
     """
@@ -51,7 +45,7 @@ def find_citizen_aftale(db_handler: SolteqTandDatabase, cpr: str):
         WHERE
             cpr = ?
             AND Description = 'Z - 22 år - Borger fyldt 22 år'
-            AND Status = '630'
+            AND (Status = '632' OR Status = '634')
         ORDER BY
             CreatedDateTime DESC
     """
