@@ -1,6 +1,6 @@
 [project]
 name = "mbu_udskrivning_22_aar_ats"
-version = "0.0.1"
+version = "1.0.0"
 description = "Full repo for process for Udskrivning 22 år - commandline parameters determines which flow to run"
 readme = "README.md"
 requires-python = ">=3.13"
