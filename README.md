@@ -1,4 +1,4 @@
-# MBU Udskrivning 22 år – Project dashboard updater
+# MBU Udskrivning 22 år – Process dashboard updater
 
 ---
 

@@ -14,18 +14,18 @@ from mbu_rpa_core.exceptions import BusinessError
 DBCONNECTIONSTRINGPROD = os.getenv("DBCONNECTIONSTRINGPROD")
 
 
-def main(item_data: dict, item_reference: dict):
+def main(item_data: dict):
     """Main function to execute the script."""
 
     data = []
     references = []
 
-    citizen_cpr = item_reference
+    citizen_cpr = item_data.get("cpr")
 
     new_clinic_ydernummer = ""
 
     print("before calling find citizen")
-    citizen_formulars = find_citizen_formulars(cpr=citizen_cpr)
+    citizen_formulars = _find_citizen_formulars(cpr=citizen_cpr)
 
     for citizen_submission in citizen_formulars:
         form_data = citizen_submission.get("data")
@@ -43,12 +43,12 @@ def main(item_data: dict, item_reference: dict):
         data.append(item_data)
 
     else:
-        raise BusinessError("Borger har ikke endnu ikke en besvarelse, der indikerer ønsket tandklinik!")
+        raise BusinessError("Borger har ikke endnu ikke en besvarelse, der indikerer ønsket tandklinik")
 
     return data, references
 
 
-def find_citizen_formulars(cpr: str = "") -> list[dict]:
+def _find_citizen_formulars(cpr: str = "") -> list[dict]:
     """
     Find any formular submission where the citizen's cpr is in the form_data
     """
@@ -107,10 +107,3 @@ def find_citizen_formulars(cpr: str = "") -> list[dict]:
             print("Invalid JSON in form_data, skipping row.")
 
     return extracted_data
-
-
-def finalization():
-
-
-
-    return

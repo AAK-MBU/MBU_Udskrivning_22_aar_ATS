@@ -2,30 +2,36 @@
 
 import os
 
+import logging
+
 from mbu_dev_shared_components.solteqtand.database.db_handler import SolteqTandDatabase
 
 from mbu_rpa_core.exceptions import BusinessError
 
+logger = logging.getLogger(__name__)
+
 SOLTEQ_TAND_DB_CONN_STRING = os.getenv("DBCONNECTIONSTRINGSOLTEQTAND")
 
 
-# pylint: disable=unused-argument
-def main(item_data: dict, item_reference: dict):
+def main(item_data: dict):
     """Main function to execute the script."""
 
-    citizen_cpr = item_reference
+    data = []
+    references = []
+
+    citizen_cpr = item_data.get("cpr")
 
     db_handler = SolteqTandDatabase(conn_str=SOLTEQ_TAND_DB_CONN_STRING)
 
-    citizen_bookings = faglig_vurdering_udfoert(db_handler=db_handler, cpr=citizen_cpr)
+    citizen_bookings = _check_if_faglig_vurdering_udfoert(db_handler=db_handler, cpr=citizen_cpr)
 
     if not citizen_bookings:
         raise BusinessError("Faglig vurdering endnu ikke udført")
 
-    return True
+    return data, references
 
 
-def faglig_vurdering_udfoert(db_handler: SolteqTandDatabase, cpr: str):
+def _check_if_faglig_vurdering_udfoert(db_handler: SolteqTandDatabase, cpr: str):
     """
     Check if a citizen has a booking with the specified aftaletype and -status
     """
@@ -52,10 +58,3 @@ def faglig_vurdering_udfoert(db_handler: SolteqTandDatabase, cpr: str):
 
     # pylint: disable=protected-access
     return db_handler._execute_query(query, params=(cpr,))
-
-
-def finalization():
-
-
-
-    return
