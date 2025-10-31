@@ -44,8 +44,6 @@ def _create_process_run(meta: dict) -> dict:
     Requires meta with at least 'cpr' and 'name' keys.
     """
 
-    print("inside create_process_run() func")
-
     process_name = "Udskrivning 22 år"
     process_id = helper_functions.find_process_id_by_name(process_name=process_name).get("id")
 
@@ -63,20 +61,14 @@ def _create_process_run(meta: dict) -> dict:
         "process_id": process_id
     }
 
-    print("before try post")
     try:
         response = requests.post(url, headers=headers, json=payload, timeout=10)
         response.raise_for_status()
 
-        print("printing the response from the post attempt:")
-        print(response)
-        print(response.json())
-
     except requests.RequestException as e:
-        print("Error creating process run:", e)
+        logger.info(f"Error creating process run: {e}")
 
         raise
-    print("after try post")
 
 
 def _add_to_faglig_vurdering_queue(item_data: dict, item_reference: str):

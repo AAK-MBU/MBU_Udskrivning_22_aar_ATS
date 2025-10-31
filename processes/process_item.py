@@ -23,15 +23,15 @@ PROCESS_FLOW_MAP = {
         "process_step_name": "Borger fyldt 22 år",
         "enqueue_items": True,
     },
-    "--faglig_vurdering_udfoert": {
-        "main": faglig_vurdering_udfoert.main,
-        "process_step_name": "Faglig vurdering udført",
-        "enqueue_items": False,
-    },
     "--aftale_oprettet_i_solteq": {
         "main": aftale_oprettet_i_solteq.main,
-        "process_step_name": "Aftale oprettet i Confirma",
+        "process_step_name": "Aftale oprettet i Solteq Tand",
         "enqueue_items": True,
+    },
+    "--faglig_vurdering_udfoert": {
+        "main": faglig_vurdering_udfoert.main,
+        "process_step_name": "Faglig vurdering",
+        "enqueue_items": False,
     },
     "--formular_indsendt": {
         "main": formular_indsendt.main,
@@ -40,13 +40,13 @@ PROCESS_FLOW_MAP = {
     },
     "--tandklinik_registreret_i_solteq": {
         "main": tandklinik_registreret_i_solteq.main,
-        "process_step_name": "Tandklinik registreret i Confirma",
-        "enqueue_items": True,
+        "process_step_name": "Tandklinik registreret i Solteq Tand",
+        "enqueue_items": False,
     },
 }
 
 
-def process_item(item_data: dict, item_reference: str):
+def process_item(workitem_id: int, item_data: dict, item_reference: str):
     """
     Entry point for processing a single item.
     Dispatches to the appropriate flow based on CLI argument.
@@ -80,16 +80,14 @@ def process_item(item_data: dict, item_reference: str):
     except BusinessError as be:
         logger.info(f"BusinessError: {be}")
 
-        if proc_config.get("use_dashboard", False):
-            handle_process_dashboard.main(status="failed", item_reference=item_reference, process_name=process_name)
+        handle_process_dashboard.main(status="failed", item_reference=item_reference, process_name=process_name, workitem_id=workitem_id)
 
         raise
 
     except Exception as e:
         logger.exception(f"Unexpected error while processing item: {e}")
 
-        if proc_config.get("use_dashboard", False):
-            handle_process_dashboard.main(status="failed", item_reference=item_reference, process_name=process_name)
+        handle_process_dashboard.main(status="failed", item_reference=item_reference, process_name=process_name, workitem_id=workitem_id)
 
         raise
 
@@ -108,8 +106,5 @@ def _enqueue_items(data, references):
     for ref, d in zip(references, data, strict=True):
         ref = str(ref or "")
 
-        print("debug print")
-        import pprint
-        pprint.pprint(d)  # or just print(d)
         if ref and ref not in existing_refs:
             workqueue.add_item({"item": {"reference": ref, "data": d}}, ref)

@@ -48,7 +48,7 @@ def fetch_next_workqueue(faglig_vurdering: bool = False):
         next_workqueue_name = "tandklinik_registreret_i_solteq"
 
     else:
-        print("ERROR: NO VALID SYS ARGUMENT GIVEN!")
+        logger.info("ERROR: NO VALID SYS ARGUMENT GIVEN!")
         sys.exit()
 
     headers = {"Authorization": f"Bearer {ATS_TOKEN}"}
@@ -151,12 +151,12 @@ def fetch_single_row(query: str, params: tuple) -> dict | None:
         return df.iloc[0].to_dict()
 
     except Exception as e:
-        print("Error during pd.read_sql:", e)
+        logger.info(f"Error during pd.read_sql: {e}")
 
         raise
 
 
-def update_process_step_run_status_api(step_run_id: int, status: str = "SUCCESSFUL"):
+def update_process_step_run_status_api(step_run_id: int, status: str = "SUCCESSFUL", workitem_id: int = None):
     """
     Sends a PATCH request to update the status of a specific step run.
     """
@@ -168,15 +168,24 @@ def update_process_step_run_status_api(step_run_id: int, status: str = "SUCCESSF
         "Content-Type": "application/json"
     }
 
-    payload = {
-        "status": status,
-    }
+    if workitem_id:
+        payload = {
+            "status": status,
+            "rerun_config": {
+                "workitem_id": workitem_id
+            }
+        }
+
+    else:
+        payload = {
+            "status": status,
+        }
 
     try:
         response = requests.patch(url, headers=headers, json=payload, timeout=10)
-        response.raise_for_status()  # Raises HTTPError for bad responses (4xx or 5xx)
+        response.raise_for_status()
 
     except requests.RequestException as e:
-        print(f"Error updating step run {step_run_id} via API:", e)
+        logger.info(f"Error updating step run {step_run_id} via API:", e)
 
         raise

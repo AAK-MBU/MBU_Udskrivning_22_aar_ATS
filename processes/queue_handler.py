@@ -15,9 +15,9 @@ from mbu_dev_shared_components.solteqtand.database.db_handler import SolteqTandD
 
 from helpers import config
 
-SOLTEQ_TAND_DB_CONN_STRING = os.getenv("DBCONNECTIONSTRINGSOLTEQTAND")
-
 logger = logging.getLogger(__name__)
+
+SOLTEQ_TAND_DB_CONN_STRING = os.getenv("DBCONNECTIONSTRINGSOLTEQTAND")
 
 
 def retrieve_items_for_queue() -> list[dict]:

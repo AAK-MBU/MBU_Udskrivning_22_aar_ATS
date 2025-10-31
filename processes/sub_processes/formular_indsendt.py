@@ -2,6 +2,8 @@
 
 import os
 
+import logging
+
 import json
 import urllib.parse
 
@@ -10,6 +12,8 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 from mbu_rpa_core.exceptions import BusinessError
+
+logger = logging.getLogger(__name__)
 
 DBCONNECTIONSTRINGPROD = os.getenv("DBCONNECTIONSTRINGPROD")
 
@@ -23,22 +27,31 @@ def main(item_data: dict):
     citizen_cpr = item_data.get("cpr")
 
     new_clinic_ydernummer = ""
+    new_clinic_phone_number = ""
 
-    print("before calling find citizen")
     citizen_formulars = _find_citizen_formulars(cpr=citizen_cpr)
 
     for citizen_submission in citizen_formulars:
         form_data = citizen_submission.get("data")
 
         if form_data.get("borger_cpr_nummer_manuelt") == citizen_cpr:
+            new_clinic_phone_number = form_data.get("tandlaege_telefonnummer_manuelt")
+
             if form_data.get("tandlaege_fremkommer_ikke_i_listen") == "0":
                 new_clinic_ydernummer = form_data.get("vaelg_tandlaege_api").split("||")[-1].strip()
 
             else:
                 new_clinic_ydernummer = form_data.get("tandlaege_ydernummer_manuelt")
 
-    # if new_clinic_ydernummer != "":
-    if new_clinic_ydernummer == "":
+    print(f"citizen_cpr: {citizen_cpr}")
+    print(f"new_clinic_ydernummer: {new_clinic_ydernummer}")
+    print(f"new_clinic_phone_number: {new_clinic_phone_number}")
+
+    item_data["new_clinic_ydernummer"] = new_clinic_ydernummer
+    item_data["new_clinic_phone_number"] = new_clinic_phone_number
+
+    # if new_clinic_ydernummer == "":  # REMOVE
+    if new_clinic_ydernummer != "" or new_clinic_phone_number != "":
         references.append(citizen_cpr)
         data.append(item_data)
 
@@ -85,12 +98,12 @@ def _find_citizen_formulars(cpr: str = "") -> list[dict]:
         df = pd.read_sql(sql=query, con=engine, params=query_params)
 
     except Exception as e:
-        print("Error during pd.read_sql:", e)
+        logger.info(f"Error during pd.read_sql: {e}")
 
         raise
 
     if df.empty:
-        print("Citizen has no formular")
+        logger.info("Citizen has no formular")
 
         return []
 
@@ -104,6 +117,6 @@ def _find_citizen_formulars(cpr: str = "") -> list[dict]:
                 extracted_data.append(parsed)
 
         except json.JSONDecodeError:
-            print("Invalid JSON in form_data, skipping row.")
+            logger.info("Invalid JSON in form_data, skipping row.")
 
     return extracted_data
