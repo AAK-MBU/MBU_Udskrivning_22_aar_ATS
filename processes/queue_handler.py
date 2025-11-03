@@ -86,7 +86,7 @@ def _get_citizen_turning_22_today(db_handler: SolteqTandDatabase, prefix: str):
     """
 
     # like_param = f"{prefix}%"
-    like_param = "1110109996"  # REMOVE
+    like_param = "1110109996"  # REMOVE / CHANGE
 
     # pylint: disable=protected-access
     return db_handler._execute_query(query, params=(like_param,))

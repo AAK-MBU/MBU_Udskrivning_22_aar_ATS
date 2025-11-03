@@ -153,7 +153,7 @@ async def finalize(workqueue: Workqueue):
     logger.info("Finalizing process...")
 
     try:
-        finalize_process(workqueue=workqueue)
+        finalize_process()
         logger.info("Finished finalizing process.")
 
     except BusinessError as e:
