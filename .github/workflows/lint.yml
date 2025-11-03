@@ -31,6 +31,6 @@ jobs:
           uv pip install .[dev] || uv pip install .
           uv pip install ruff
 
-      - name: Ruff (format check)
+      - name: Ruff (lint)
         run: |
-          uv run ruff format --check .
+          uv run ruff check --output-format=github .

@@ -1,26 +1,95 @@
 """Module to hande queue population"""
 
+import sys
+import os
 import asyncio
 import json
 import logging
 
+from datetime import date
+from dateutil.relativedelta import relativedelta
+
 from automation_server_client import Workqueue
+
+from mbu_dev_shared_components.solteqtand.database.db_handler import SolteqTandDatabase
 
 from helpers import config
 
 logger = logging.getLogger(__name__)
 
+SOLTEQ_TAND_DB_CONN_STRING = os.getenv("DBCONNECTIONSTRINGSOLTEQTAND")
+
 
 def retrieve_items_for_queue() -> list[dict]:
-    """Function to populate queue"""
+    """Function to populate queue with items for processing."""
+
+    if "--borger_fyldt_22" not in sys.argv:
+        return []
+
     data = []
     references = []
+
+    prefix = (date.today() - relativedelta(years=22)).strftime("%d%m%y")
+
+    db_handler = SolteqTandDatabase(conn_str=SOLTEQ_TAND_DB_CONN_STRING)
+
+    citizen_in_age_range = _get_citizen_turning_22_today(db_handler, prefix)
+
+    for citizen_solteq in citizen_in_age_range:
+        patient_id = citizen_solteq["patientId"]
+        citizen_cpr = citizen_solteq["cpr"]
+        citizen_full_name = f"{citizen_solteq['firstName']} {citizen_solteq['lastName']}"
+
+        filters = {"p.cpr": citizen_cpr}
+
+        list_of_associated_primary_clinics = db_handler.get_list_of_primary_dental_clinics(filters=filters)
+
+        if not list_of_associated_primary_clinics:
+            citizen_clinic = "Ingen klinik fundet"
+
+        else:
+            citizen_clinic = list_of_associated_primary_clinics[0].get("preferredDentalClinicName")
+
+        references.append(citizen_cpr)
+        data.append({
+            "patientId": patient_id,
+            "cpr": citizen_cpr,
+            "fullName": citizen_full_name,
+            "clinic": citizen_clinic,
+        })
 
     items = [
         {"reference": ref, "data": d} for ref, d in zip(references, data, strict=True)
     ]
 
     return items
+
+
+def _get_citizen_turning_22_today(db_handler: SolteqTandDatabase, prefix: str):
+    """
+    Get citizen who are exactly 22 years old based on CPR.
+    """
+
+    query = """
+        SELECT
+            patientId,
+            firstName,
+            lastName,
+            cpr
+        FROM
+            -- [tmtdata_prod].[dbo].[ACTIVE_PATIENTS]
+            [tmtdata_prod].[dbo].[PATIENT]
+        WHERE
+            cpr LIKE ?
+        ORDER BY
+            firstName, lastName;
+    """
+
+    # like_param = f"{prefix}%"
+    like_param = "1110109996"  # REMOVE / CHANGE
+
+    # pylint: disable=protected-access
+    return db_handler._execute_query(query, params=(like_param,))
 
 
 def create_sort_key(item: dict) -> str:
