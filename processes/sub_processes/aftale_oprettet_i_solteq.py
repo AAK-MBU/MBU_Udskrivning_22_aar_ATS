@@ -12,23 +12,14 @@ SOLTEQ_TAND_DB_CONN_STRING = os.getenv("DBCONNECTIONSTRINGSOLTEQTAND")
 def main(item_data: dict):
     """Main function to execute the script."""
 
-    data = []
-    references = []
-
     citizen_cpr = item_data.get("cpr")
 
     db_handler = SolteqTandDatabase(conn_str=SOLTEQ_TAND_DB_CONN_STRING)
 
     citizen_bookings = _find_citizen_aftale(db_handler=db_handler, cpr=citizen_cpr)
 
-    if citizen_bookings:
-        references.append(citizen_cpr)
-        data.append(item_data)
-
-    else:
+    if not citizen_bookings:
         raise BusinessError("Borger har ikke en aftale med aftaletype 'Z - 22 år - Borger fyldt 22 år' og aftalestaus '22 år - Afventer faglig vurdering'")
-
-    return data, references
 
 
 def _find_citizen_aftale(db_handler: SolteqTandDatabase, cpr: str):

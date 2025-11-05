@@ -16,19 +16,14 @@ SOLTEQ_TAND_DB_CONN_STRING = os.getenv("DBCONNECTIONSTRINGSOLTEQTAND")
 def main(item_data: dict):
     """Main function to execute the script."""
 
-    data = []
-    references = []
-
     citizen_cpr = item_data.get("cpr")
 
     db_handler = SolteqTandDatabase(conn_str=SOLTEQ_TAND_DB_CONN_STRING)
 
-    citizen_bookings = _check_if_faglig_vurdering_udfoert(db_handler=db_handler, cpr=citizen_cpr)
+    citizen__udskrivning_bookings = _check_if_faglig_vurdering_udfoert(db_handler=db_handler, cpr=citizen_cpr)
 
-    if not citizen_bookings:
+    if not citizen__udskrivning_bookings:
         raise BusinessError("Faglig vurdering endnu ikke udført")
-
-    return data, references
 
 
 def _check_if_faglig_vurdering_udfoert(db_handler: SolteqTandDatabase, cpr: str):

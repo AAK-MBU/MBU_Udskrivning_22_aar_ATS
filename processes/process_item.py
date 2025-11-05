@@ -9,11 +9,9 @@ from processes.sub_processes import (
     borger_fyldt_22,
     faglig_vurdering_udfoert,
     aftale_oprettet_i_solteq,
-    formular_indsendt,
-    tandklinik_registreret_i_solteq,
-    handle_process_dashboard
 )
-from helpers import helper_functions, ats_functions
+
+from helpers import helper_functions
 
 logger = logging.getLogger(__name__)
 
@@ -21,28 +19,15 @@ PROCESS_FLOW_MAP = {
     "--borger_fyldt_22": {
         "main": borger_fyldt_22.main,
         "process_step_name": "Borger fyldt 22 år",
-        "enqueue_items": True,
     },
     "--aftale_oprettet_i_solteq": {
         "main": aftale_oprettet_i_solteq.main,
         "process_step_name": "Aftale oprettet i Solteq Tand",
-        "enqueue_items": True,
     },
     "--faglig_vurdering_udfoert": {
         "main": faglig_vurdering_udfoert.main,
         "process_step_name": "Faglig vurdering",
-        "enqueue_items": False,
-    },
-    "--formular_indsendt": {
-        "main": formular_indsendt.main,
-        "process_step_name": "Formular indsendt",
-        "enqueue_items": True,
-    },
-    "--tandklinik_registreret_i_solteq": {
-        "main": tandklinik_registreret_i_solteq.main,
-        "process_step_name": "Tandklinik registreret i Solteq Tand",
-        "enqueue_items": False,
-    },
+    }
 }
 
 
@@ -63,48 +48,29 @@ def process_item(workitem_id: int, item_data: dict, item_reference: str):
             logger.info(f"Running flow: {arg}")
 
             process_name = proc_config.get("process_step_name")
-            enqueue_items = proc_config.get("enqueue_items")
 
-            if arg != "--borger_fyldt_22":
-                handle_process_dashboard.main(status="running", item_reference=item_reference, process_name=process_name)
+            if arg == "--borger_fyldt_22":
+                proc_config["main"](item_data=item_data, item_reference=item_reference)
 
-            data, references = proc_config["main"](item_data=item_data)
+            else:
+                helper_functions.handle_process_dashboard(status="running", item_reference=item_reference, process_name=process_name)
 
-            handle_process_dashboard.main(status="success", item_reference=item_reference, process_name=process_name)
+                proc_config["main"](item_data=item_data)
 
-            if enqueue_items:
-                _enqueue_items(data, references)
+            helper_functions.handle_process_dashboard(status="success", item_reference=item_reference, process_name=process_name)
 
             break
 
     except BusinessError as be:
         logger.info(f"BusinessError: {be}")
 
-        handle_process_dashboard.main(status="failed", item_reference=item_reference, process_name=process_name, workitem_id=workitem_id)
+        helper_functions.handle_process_dashboard(status="failed", item_reference=item_reference, process_name=process_name, workitem_id=workitem_id)
 
         raise
 
     except Exception as e:
         logger.exception(f"Unexpected error while processing item: {e}")
 
-        handle_process_dashboard.main(status="failed", item_reference=item_reference, process_name=process_name, workitem_id=workitem_id)
+        helper_functions.handle_process_dashboard(status="failed", item_reference=item_reference, process_name=process_name, workitem_id=workitem_id)
 
         raise
-
-
-def _enqueue_items(data, references):
-    """
-    Enqueues each (reference, data) pair to the next workqueue, avoiding duplicates.
-
-    Used for standard flows where further processing is required in later steps.
-    """
-
-    workqueue = helper_functions.fetch_next_workqueue()
-
-    existing_refs = {str(r) for r in ats_functions.get_workqueue_items(workqueue)}
-
-    for ref, d in zip(references, data, strict=True):
-        ref = str(ref or "")
-
-        if ref and ref not in existing_refs:
-            workqueue.add_item({"item": {"reference": ref, "data": d}}, ref)

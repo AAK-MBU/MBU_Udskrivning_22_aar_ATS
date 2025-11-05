@@ -1,6 +1,5 @@
 """Helper functions"""
 
-import sys
 import os
 import logging
 
@@ -11,8 +10,6 @@ import requests
 import pandas as pd
 
 from sqlalchemy import create_engine
-
-from automation_server_client import AutomationServer
 
 logger = logging.getLogger(__name__)
 
@@ -26,43 +23,6 @@ ATS_URL = os.getenv("ATS_URL")
 
 DBCONNECTIONSTRINGPROD = os.getenv("DBCONNECTIONSTRINGPROD")
 DBCONNECTIONSTRINGDEV = os.getenv("DBCONNECTIONSTRINGDEV")
-
-
-def fetch_next_workqueue(faglig_vurdering: bool = False):
-    """
-    Helper function to fetch the next workqueue in the overall process flow
-    """
-
-    next_workqueue_name = ""
-
-    if faglig_vurdering:
-        next_workqueue_name = "faglig_vurdering_udfoert"
-
-    elif "--borger_fyldt_22" in sys.argv:
-        next_workqueue_name = "aftale_oprettet_i_solteq"
-
-    elif "--aftale_oprettet_i_solteq" in sys.argv:
-        next_workqueue_name = "formular_indsendt"
-
-    elif "--formular_indsendt" in sys.argv:
-        next_workqueue_name = "tandklinik_registreret_i_solteq"
-
-    else:
-        logger.info("ERROR: NO VALID SYS ARGUMENT GIVEN!")
-        sys.exit()
-
-    headers = {"Authorization": f"Bearer {ATS_TOKEN}"}
-
-    full_url = f"{ATS_URL}/workqueues/by_name/tan.udskrivning22.{next_workqueue_name}"
-
-    response_json = requests.get(full_url, headers=headers, timeout=60).json()
-    workqueue_id = response_json.get("id")
-
-    os.environ["ATS_WORKQUEUE_OVERRIDE"] = str(workqueue_id)  # override it
-    ats = AutomationServer.from_environment()
-    workqueue = ats.workqueue()
-
-    return workqueue
 
 
 def find_process_id_by_name(process_name: str) -> dict | None:
@@ -85,10 +45,26 @@ def find_process_id_by_name(process_name: str) -> dict | None:
             name = ?
     """
 
-    return fetch_single_row(query, (process_name,))
+    return _fetch_single_row(query, (process_name,))
 
 
-def find_process_step_run_by_name_and_cpr(process_step_name: str, cpr: str) -> dict | None:
+def handle_process_dashboard(status: str, item_reference: str, process_name: str, workitem_id: int = None):
+    """
+    Method for handling updating the process dashboard
+    """
+
+    citizen_cpr = item_reference
+
+    process_step_run_id = _find_process_step_run_by_name_and_cpr(process_step_name=process_name, cpr=citizen_cpr).get("step_run_id")
+
+    if process_name == "Tandklinik registreret i Solteq Tand" and status == "failed":
+        _update_process_step_run_status_api(step_run_id=process_step_run_id, status=status, workitem_id=workitem_id)
+
+    else:
+        _update_process_step_run_status_api(step_run_id=process_step_run_id, status=status)
+
+
+def _find_process_step_run_by_name_and_cpr(process_step_name: str, cpr: str) -> dict | None:
     """
     Helper to fetch process_step_run data for a given step name and citizen CPR,
     using the process name 'Udskrivning 22 år' instead of hardcoded process_id.
@@ -129,10 +105,10 @@ def find_process_step_run_by_name_and_cpr(process_step_name: str, cpr: str) -> d
             AND step_run.deleted_at is NULL
     """
 
-    return fetch_single_row(query, ("Udskrivning 22 år", process_step_name, cpr))
+    return _fetch_single_row(query, ("Udskrivning 22 år", process_step_name, cpr))
 
 
-def fetch_single_row(query: str, params: tuple) -> dict | None:
+def _fetch_single_row(query: str, params: tuple) -> dict | None:
     """
     Helper to execute a SQL query and return the first row as dict, or None if empty.
     """
@@ -156,7 +132,7 @@ def fetch_single_row(query: str, params: tuple) -> dict | None:
         raise
 
 
-def update_process_step_run_status_api(step_run_id: int, status: str = "SUCCESSFUL", workitem_id: int = None):
+def _update_process_step_run_status_api(step_run_id: int, status: str = "SUCCESSFUL", workitem_id: int = None):
     """
     Sends a PATCH request to update the status of a specific step run.
     """
