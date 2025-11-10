@@ -48,7 +48,7 @@ def find_process_id_by_name(process_name: str) -> dict | None:
     return _fetch_single_row(query, (process_name,))
 
 
-def handle_process_dashboard(status: str, item_reference: str, process_name: str, workitem_id: int = None):
+def handle_process_dashboard(status: str, item_reference: str, process_name: str):
     """
     Method for handling updating the process dashboard
     """
@@ -57,11 +57,7 @@ def handle_process_dashboard(status: str, item_reference: str, process_name: str
 
     process_step_run_id = _find_process_step_run_by_name_and_cpr(process_step_name=process_name, cpr=citizen_cpr).get("step_run_id")
 
-    if process_name == "Tandklinik registreret i Solteq Tand" and status == "failed":
-        _update_process_step_run_status_api(step_run_id=process_step_run_id, status=status, workitem_id=workitem_id)
-
-    else:
-        _update_process_step_run_status_api(step_run_id=process_step_run_id, status=status)
+    _update_process_step_run_status_api(step_run_id=process_step_run_id, status=status)
 
 
 def _find_process_step_run_by_name_and_cpr(process_step_name: str, cpr: str) -> dict | None:

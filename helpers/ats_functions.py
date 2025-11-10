@@ -27,8 +27,8 @@ def get_workqueue_items(workqueue: Workqueue, return_data=False):
     """
     load_dotenv()
 
-    url = os.getenv("ATS_URL")
-    token = os.getenv("ATS_TOKEN")
+    url = ATS_URL
+    token = ATS_TOKEN
 
     if not url or not token:
         raise OSError("ATS_URL or ATS_TOKEN is not set in the environment")
