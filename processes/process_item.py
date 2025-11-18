@@ -31,7 +31,7 @@ PROCESS_FLOW_MAP = {
 }
 
 
-def process_item(workitem_id: int, item_data: dict, item_reference: str):
+def process_item(item_data: dict, item_reference: str):
     """
     Entry point for processing a single item.
     Dispatches to the appropriate flow based on CLI argument.
@@ -64,13 +64,13 @@ def process_item(workitem_id: int, item_data: dict, item_reference: str):
     except BusinessError as be:
         logger.info(f"BusinessError: {be}")
 
-        helper_functions.handle_process_dashboard(status="failed", item_reference=item_reference, process_name=process_name, workitem_id=workitem_id)
+        helper_functions.handle_process_dashboard(status="failed", item_reference=item_reference, process_name=process_name)
 
         raise
 
     except Exception as e:
         logger.exception(f"Unexpected error while processing item: {e}")
 
-        helper_functions.handle_process_dashboard(status="failed", item_reference=item_reference, process_name=process_name, workitem_id=workitem_id)
+        helper_functions.handle_process_dashboard(status="failed", item_reference=item_reference, process_name=process_name)
 
         raise

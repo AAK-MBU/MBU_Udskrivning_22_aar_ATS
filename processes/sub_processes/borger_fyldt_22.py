@@ -10,8 +10,6 @@ import requests
 
 from automation_server_client._models import Workqueue
 
-from processes.sub_processes import handle_process_dashboard
-
 from helpers import helper_functions, ats_functions
 
 logger = logging.getLogger(__name__)
@@ -38,7 +36,7 @@ def main(item_data: dict, item_reference: str):
 
     _create_process_run(process_name=process_name, started_at=started_at_str, meta=meta_data_for_dashboard)
 
-    handle_process_dashboard.main(status="running", item_reference=item_reference, process_name=process_name)
+    helper_functions.handle_process_dashboard.main(status="running", item_reference=item_reference, process_name=process_name)
 
     for workqueue_name in ["aftale_oprettet_i_solteq", "faglig_vurdering_udfoert"]:
         workqueue = ats_functions.fetch_workqueue(workqueue_name=workqueue_name)
