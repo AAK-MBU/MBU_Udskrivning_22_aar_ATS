@@ -77,8 +77,7 @@ def _get_citizen_turning_22_today(db_handler: SolteqTandDatabase, prefix: str):
             lastName,
             cpr
         FROM
-            -- [tmtdata_prod].[dbo].[ACTIVE_PATIENTS]
-            [tmtdata_prod].[dbo].[PATIENT]
+            [tmtdata_prod].[dbo].[ACTIVE_PATIENTS]
         WHERE
             cpr LIKE ?
         ORDER BY
