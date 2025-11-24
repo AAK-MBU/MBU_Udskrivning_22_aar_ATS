@@ -4,7 +4,7 @@ import os
 
 import logging
 
-from mbu_dev_shared_components.solteqtand.database.db_handler import SolteqTandDatabase
+from mbu_solteqtand_shared_components.database.db_handler import SolteqTandDatabase
 
 from mbu_rpa_core.exceptions import BusinessError
 

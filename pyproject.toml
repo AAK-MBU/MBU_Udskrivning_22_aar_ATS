@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "automation-server-client @ git+https://github.com/odense-rpa/automation-server-client.git",
-    "mbu-dev-shared-components[solteqtand]>=4.2.1",
+    "mbu-solteqtand-shared-components[database]>=1.0.2",
     "mbu_msoffice_integration>=1.0.1",
     "mbu-rpa-core",
     "mbu-process-dashboard-shared-components>=1.0.1",

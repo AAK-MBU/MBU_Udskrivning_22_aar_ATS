@@ -11,7 +11,7 @@ from dateutil.relativedelta import relativedelta
 
 from automation_server_client import Workqueue
 
-from mbu_dev_shared_components.solteqtand.database.db_handler import SolteqTandDatabase
+from mbu_solteqtand_shared_components.database.db_handler import SolteqTandDatabase
 
 from helpers import config
 
