@@ -7,7 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "automation-server-client @ git+https://github.com/odense-rpa/automation-server-client.git",
     "mbu-dev-shared-components>=4.2.5",
-    "mbu-solteqtand-shared-components>=1.0.2",
+    "mbu-solteqtand-shared-components>=1.0.3",
     "mbu_msoffice_integration>=1.0.1",
     "mbu-rpa-core",
     "mbu-process-dashboard-shared-components>=1.0.1",
