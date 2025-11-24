@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 # ╔══════════════════════════════════════════════╗
 # ║ 🔥 REMOVE BEFORE DEPLOYMENT (TEMP OVERRIDES) 🔥 ║
 # ╚══════════════════════════════════════════════╝
-### This block handles the workqueue id selection
+## This block handles the workqueue id selection
 # import os
 # from dotenv import load_dotenv
 # load_dotenv()
@@ -36,13 +36,7 @@ logger = logging.getLogger(__name__)
 # elif "--aftale_oprettet_i_solteq" in sys.argv:
 #     os.environ["ATS_WORKQUEUE_OVERRIDE"] = os.getenv("ATS_WORKQUEUE_ID_AFTALE_OPRETTET_I_SOLTEQ")
 
-# elif "--formular_indsendt" in sys.argv:
-#     os.environ["ATS_WORKQUEUE_OVERRIDE"] = os.getenv("ATS_WORKQUEUE_ID_FORMULAR_INDSENDT")
-
-# elif "--tandklinik_registreret_i_solteq" in sys.argv:
-#     os.environ["ATS_WORKQUEUE_OVERRIDE"] = os.getenv("ATS_WORKQUEUE_ID_TANDKLINIK_REGISTRERET_I_SOLTEQ")
-
-# ### This block disables SSL verification and overrides env vars ###
+# This block disables SSL verification and overrides env vars
 # import requests
 # import urllib3
 # urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -92,15 +86,13 @@ async def process_workqueue(workqueue: Workqueue):
 
     while error_count < config.MAX_RETRY:
         for item in workqueue:
-            workitem_id = item.id
-
             try:
                 with item:
                     data, reference = ats_functions.get_item_info(item)
 
                     try:
                         logger.info("Processing item with reference: %s", reference)
-                        process_item(workitem_id, data, reference)
+                        process_item(data, reference)
 
                         completed_state = CompletedState.completed(
                             "Process completed without exceptions"

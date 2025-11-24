@@ -1,6 +1,6 @@
 [project]
 name = "mbu_udskrivning_22_aar_ats"
-version = "0.0.1"
+version = "0.0.2"
 description = "Full repo for process for Udskrivning 22 år - commandline parameters determines which flow to run"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -9,6 +9,7 @@ dependencies = [
     "mbu-dev-shared-components[solteqtand]>=4.2.1",
     "mbu_msoffice_integration>=1.0.1",
     "mbu-rpa-core",
+    "mbu-process-dashboard-shared-components>=1.0.1",
     "pillow",
     "ruff",
     "pandas",

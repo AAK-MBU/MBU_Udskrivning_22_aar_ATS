@@ -77,16 +77,14 @@ def _get_citizen_turning_22_today(db_handler: SolteqTandDatabase, prefix: str):
             lastName,
             cpr
         FROM
-            -- [tmtdata_prod].[dbo].[ACTIVE_PATIENTS]
-            [tmtdata_prod].[dbo].[PATIENT]
+            [tmtdata_prod].[dbo].[ACTIVE_PATIENTS]
         WHERE
             cpr LIKE ?
         ORDER BY
             firstName, lastName;
     """
 
-    # like_param = f"{prefix}%"
-    like_param = "1110109996"  # REMOVE / CHANGE
+    like_param = f"{prefix}%"
 
     # pylint: disable=protected-access
     return db_handler._execute_query(query, params=(like_param,))

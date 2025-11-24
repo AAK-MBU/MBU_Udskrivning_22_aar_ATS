@@ -4,9 +4,6 @@ import os
 
 import logging
 
-import requests
-
-
 from helpers import helper_functions, ats_functions
 
 logger = logging.getLogger(__name__)
@@ -14,69 +11,29 @@ logger = logging.getLogger(__name__)
 SOLTEQ_TAND_DB_CONN_STRING = os.getenv("DBCONNECTIONSTRINGSOLTEQTAND")
 
 
-def main(item_data: dict):
+def main(item_data: dict, item_reference: str):
     """Main function to execute the script."""
-
-    data = []
-    references = []
 
     citizen_cpr = item_data.get("cpr")
 
+    process_name = "Udskrivning 22 år"
+
     meta_data_for_dashboard = {
         "cpr": citizen_cpr,
-        "name": item_data.get("fullName"),
         "clinic": item_data.get("clinic"),
+        "name": item_data.get("fullName"),
+        "patientId": item_data.get("patientId"),
+        "new_clinic_ydernummer": "",
+        "new_clinic_phone_number": "",
     }
 
-    _create_process_run(meta=meta_data_for_dashboard)
+    helper_functions.handle_dashboard_run_creation(process_name=process_name, meta=meta_data_for_dashboard)
 
-    _add_to_faglig_vurdering_queue(item_data=item_data, item_reference=citizen_cpr)
+    process_step_name = "Borger fyldt 22 år"
 
-    references.append(citizen_cpr)
-    data.append(item_data)
+    helper_functions.handle_process_dashboard(status="running", item_reference=item_reference, process_step_name=process_step_name)
 
-    return data, references
+    for workqueue_name in ["aftale_oprettet_i_solteq", "faglig_vurdering_udfoert"]:
+        workqueue = ats_functions.fetch_workqueue(workqueue_name=workqueue_name)
 
-
-def _create_process_run(meta: dict) -> dict:
-    """
-    Sends a POST request to create a new process run.
-    Requires meta with at least 'cpr' and 'name' keys.
-    """
-
-    process_name = "Udskrivning 22 år"
-    process_id = helper_functions.find_process_id_by_name(process_name=process_name).get("id")
-
-    url = "https://mbu-dashboard-api.adm.aarhuskommune.dk/api/v1/runs/"
-
-    headers = {
-        "X-API-Key": os.getenv("API_ADMIN_TOKEN"),
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "entity_id": meta.get("cpr"),
-        "entity_name": meta.get("name"),
-        "meta": meta,
-        "process_id": process_id
-    }
-
-    try:
-        response = requests.post(url, headers=headers, json=payload, timeout=10)
-        response.raise_for_status()
-
-    except requests.RequestException as e:
-        logger.info(f"Error creating process run: {e}")
-
-        raise
-
-
-def _add_to_faglig_vurdering_queue(item_data: dict, item_reference: str):
-    faglig_vurdering_queue = helper_functions.fetch_next_workqueue(faglig_vurdering=True)
-
-    existing_refs = {str(r) for r in ats_functions.get_workqueue_items(faglig_vurdering_queue)}
-
-    ref = item_reference
-
-    if ref and ref not in existing_refs:
-        faglig_vurdering_queue.add_item({"item": {"reference": ref, "data": item_data}}, ref)
+        ats_functions.enqueue_items(workqueue=workqueue, item_data=item_data, reference=item_reference)
