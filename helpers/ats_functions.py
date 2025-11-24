@@ -4,10 +4,12 @@ import os
 import logging
 
 import requests
-from automation_server_client import WorkItem, Workqueue
-from dotenv import load_dotenv
 
 from automation_server_client import AutomationServer
+from automation_server_client import WorkItem, Workqueue
+
+from dotenv import load_dotenv
+
 
 logger = logging.getLogger(__name__)
 
@@ -94,3 +96,16 @@ def fetch_workqueue(workqueue_name: str):
     workqueue = ats.workqueue()
 
     return workqueue
+
+
+def enqueue_items(workqueue: Workqueue, item_data: dict, reference: dict):
+    """
+    Enqueues each (reference, data) pair to the next workqueue, avoiding duplicates.
+
+    Used for standard flows where further processing is required in later steps.
+    """
+
+    existing_refs = {str(r) for r in get_workqueue_items(workqueue)}
+
+    if reference and reference not in existing_refs:
+        workqueue.add_item({"item": {"reference": reference, "data": item_data}}, reference)

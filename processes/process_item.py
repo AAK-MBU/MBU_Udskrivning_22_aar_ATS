@@ -47,30 +47,30 @@ def process_item(item_data: dict, item_reference: str):
 
             logger.info(f"Running flow: {arg}")
 
-            process_name = proc_config.get("process_step_name")
+            process_step_name = proc_config.get("process_step_name")
 
             if arg == "--borger_fyldt_22":
                 proc_config["main"](item_data=item_data, item_reference=item_reference)
 
             else:
-                helper_functions.handle_process_dashboard(status="running", item_reference=item_reference, process_name=process_name)
+                helper_functions.handle_process_dashboard(status="running", item_reference=item_reference, process_step_name=process_step_name)
 
                 proc_config["main"](item_data=item_data)
 
-            helper_functions.handle_process_dashboard(status="success", item_reference=item_reference, process_name=process_name)
+            helper_functions.handle_process_dashboard(status="success", item_reference=item_reference, process_step_name=process_step_name)
 
             break
 
     except BusinessError as be:
         logger.info(f"BusinessError: {be}")
 
-        helper_functions.handle_process_dashboard(status="failed", item_reference=item_reference, process_name=process_name)
+        helper_functions.handle_process_dashboard(status="failed", item_reference=item_reference, process_step_name=process_step_name, failure=be)
 
         raise
 
     except Exception as e:
         logger.exception(f"Unexpected error while processing item: {e}")
 
-        helper_functions.handle_process_dashboard(status="failed", item_reference=item_reference, process_name=process_name)
+        helper_functions.handle_process_dashboard(status="failed", item_reference=item_reference, process_step_name=process_step_name, failure=e)
 
         raise

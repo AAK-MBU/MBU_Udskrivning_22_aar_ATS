@@ -9,6 +9,7 @@ dependencies = [
     "mbu-dev-shared-components[solteqtand]>=4.2.1",
     "mbu_msoffice_integration>=1.0.1",
     "mbu-rpa-core",
+    "mbu-process-dashboard-shared-components>=1.0.1",
     "pillow",
     "ruff",
     "pandas",
