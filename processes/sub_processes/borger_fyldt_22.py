@@ -27,10 +27,12 @@ def main(item_data: dict, item_reference: str):
         "new_clinic_phone_number": "",
     }
 
+    logger.info(f"Creating process run for cpr: {citizen_cpr} ...")
     helper_functions.handle_dashboard_run_creation(process_name=process_name, meta=meta_data_for_dashboard)
 
     process_step_name = "Borger fyldt 22 år"
 
+    logger.info(f"Handling dashboard update for step: {process_step_name} ...")
     helper_functions.handle_process_dashboard(status="running", item_reference=item_reference, process_step_name=process_step_name)
 
     for workqueue_name in ["aftale_oprettet_i_solteq", "faglig_vurdering_udfoert"]:

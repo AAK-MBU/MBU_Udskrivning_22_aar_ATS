@@ -34,6 +34,8 @@ def handle_process_dashboard(status: str, item_reference: str, process_step_name
 
     citizen_cpr = item_reference
 
+    logger.info("before get_step_run_id_for_process_step_cpr() ...")
+
     step_run_id = process_step_run.get_step_run_id_for_process_step_cpr(client=CLIENT, process_name="Udskrivning 22 år", step_name=process_step_name, cpr=citizen_cpr)
 
     if failure:
@@ -43,6 +45,8 @@ def handle_process_dashboard(status: str, item_reference: str, process_step_name
 
     else:
         step_run_update_data = process_step_run.build_step_run_update(status=status)
+
+    logger.info("before update_dashboard_step_run_by_id() ...")
 
     updated_step_run_data, status_code = process_step_run.update_dashboard_step_run_by_id(client=CLIENT, step_run_id=step_run_id, update_data=step_run_update_data)
 
