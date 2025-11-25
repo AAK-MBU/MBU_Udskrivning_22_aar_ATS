@@ -22,7 +22,7 @@ PROCESS_FLOW_MAP = {
     },
     "--aftale_oprettet_i_solteq": {
         "main": aftale_oprettet_i_solteq.main,
-        "process_step_name": "Aftale oprettet i Solteq Tand",
+        "process_step_name": "Aftale oprettet i Solteq",
     },
     "--faglig_vurdering_udfoert": {
         "main": faglig_vurdering_udfoert.main,
