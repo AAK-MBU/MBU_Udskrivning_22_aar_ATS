@@ -39,9 +39,9 @@ def _find_citizen_aftale(db_handler: SolteqTandDatabase, cpr: str):
         FROM
             [tmtdata_prod].[dbo].[BOOKING] b
         JOIN
-            PATIENT p ON p.patientId = b.patientId
+            [tmtdata_prod].[dbo].[PATIENT] p ON p.patientId = b.patientId
         JOIN
-            BOOKINGTYPE bt ON bt.BookingTypeID = b.BookingTypeID
+            [tmtdata_prod].[dbo].[BOOKINGTYPE] bt ON bt.BookingTypeID = b.BookingTypeID
         WHERE
             cpr = ?
             AND Description = 'Z - 22 år - Borger fyldt 22 år'
