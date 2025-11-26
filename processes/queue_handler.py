@@ -6,6 +6,8 @@ import asyncio
 import json
 import logging
 
+import argparse
+
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
@@ -19,6 +21,11 @@ logger = logging.getLogger(__name__)
 
 SOLTEQ_TAND_DB_CONN_STRING = os.getenv("DBCONNECTIONSTRINGSOLTEQTAND")
 
+### Small snippet that allows manual prefix testing ###
+parser = argparse.ArgumentParser(add_help=False)
+parser.add_argument("--manual_test", type=str, help="Override prefix")
+parsed_args, _ = parser.parse_known_args()
+
 
 def retrieve_items_for_queue() -> list[dict]:
     """Function to populate queue with items for processing."""
@@ -29,7 +36,11 @@ def retrieve_items_for_queue() -> list[dict]:
     data = []
     references = []
 
-    prefix = (date.today() - relativedelta(years=22)).strftime("%d%m%y")
+    if parsed_args.manual_test:
+        prefix = parsed_args.manual_test.strip()
+
+    else:
+        prefix = (date.today() - relativedelta(years=22)).strftime("%d%m%y")
 
     db_handler = SolteqTandDatabase(conn_str=SOLTEQ_TAND_DB_CONN_STRING)
 
