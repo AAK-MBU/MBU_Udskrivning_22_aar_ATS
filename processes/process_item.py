@@ -64,6 +64,9 @@ def process_item(item_data: dict, item_reference: str):
     except BusinessError as be:
         logger.info(f"BusinessError: {be}")
 
+        if str(be) == "Faglig vurdering endnu ikke udført":
+            helper_functions.handle_process_dashboard(status="pending", item_reference=item_reference, process_step_name=process_step_name, failure=be)
+
         helper_functions.handle_process_dashboard(status="failed", item_reference=item_reference, process_step_name=process_step_name, failure=be)
 
         raise
