@@ -170,6 +170,8 @@ if __name__ == "__main__":
     prod_workqueue = ats.workqueue()
     process = ats.process
 
+    logger.info(f"printing workqueue: {prod_workqueue}")
+
     if "--queue" in sys.argv:
         asyncio.run(populate_queue(prod_workqueue))
 
