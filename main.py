@@ -5,7 +5,6 @@ This is the main entry point for the process
 import asyncio
 import logging
 import sys
-import os
 
 from automation_server_client import AutomationServer, Workqueue
 from mbu_rpa_core.exceptions import BusinessError, ProcessError
@@ -19,8 +18,6 @@ from processes.process_item import process_item
 from processes.queue_handler import concurrent_add, retrieve_items_for_queue
 
 logger = logging.getLogger(__name__)
-
-os.environ["REQUESTS_CA_BUNDLE"] = R"C:\certs\aarhus_root.pem"
 
 
 # ╔══════════════════════════════════════════════╗
