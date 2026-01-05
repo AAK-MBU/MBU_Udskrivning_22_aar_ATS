@@ -20,7 +20,17 @@ def handle_dashboard_run_creation(process_name: str, meta: dict):
     Method for handling the creation of new process dashboard runs
     """
 
-    process_run.create_dashboard_run(client=CLIENT, process_name=process_name, meta=meta)
+    print(f"meta: {meta}")
+
+    citizen_cpr = meta.get("cpr")
+
+    existing_run_id = process_run.get_process_run_by_cpr(client=CLIENT, process_name=process_name, cpr=citizen_cpr)
+
+    if existing_run_id:
+        logger.info("Process run already exists for citizen")
+
+    else:
+        process_run.create_dashboard_run(client=CLIENT, process_name=process_name, meta=meta)
 
 
 def handle_process_dashboard(status: str, item_reference: str, process_step_name: str, failure: Exception | None = None):
