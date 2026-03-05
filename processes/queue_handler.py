@@ -6,6 +6,8 @@ import asyncio
 import json
 import logging
 
+import calendar
+
 import argparse
 
 from datetime import date
@@ -44,7 +46,19 @@ def retrieve_items_for_queue() -> list[dict]:
 
     db_handler = SolteqTandDatabase(conn_str=SOLTEQ_TAND_DB_CONN_STRING)
 
-    citizen_in_age_range = _get_citizen_turning_22_today(db_handler, prefix)
+    prefixes = [prefix]
+
+    # Handle Feb 29 birthdays in non-leap years (they are processed on March 1)
+    if prefix.startswith("0103") and not calendar.isleap(date.today().year):
+        leap_prefix = "2902" + prefix[-2:]
+        prefixes.append(leap_prefix)
+
+    citizen_in_age_range = []
+
+    for p in prefixes:
+        citizen_in_age_range.extend(
+            _get_citizen_turning_22_today(db_handler, p)
+        )
 
     for citizen_solteq in citizen_in_age_range:
         patient_id = citizen_solteq["patientId"]
@@ -57,11 +71,11 @@ def retrieve_items_for_queue() -> list[dict]:
 
         if not list_of_associated_primary_clinics:
             citizen_clinic = "Ingen klinik fundet"
-
         else:
             citizen_clinic = list_of_associated_primary_clinics[0].get("preferredDentalClinicName")
 
         references.append(citizen_cpr)
+
         data.append({
             "patientId": patient_id,
             "cpr": citizen_cpr,
@@ -70,7 +84,8 @@ def retrieve_items_for_queue() -> list[dict]:
         })
 
     items = [
-        {"reference": ref, "data": d} for ref, d in zip(references, data, strict=True)
+        {"reference": ref, "data": d}
+        for ref, d in zip(references, data, strict=True)
     ]
 
     return items
