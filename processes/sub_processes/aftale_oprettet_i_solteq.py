@@ -19,7 +19,7 @@ def main(item_data: dict):
     citizen_bookings = _find_citizen_aftale(db_handler=db_handler, cpr=citizen_cpr)
 
     if not citizen_bookings:
-        raise BusinessError("Borger har ikke en aftale med aftaletype 'Z - 22 år - Borger fyldt 22 år' og aftalestaus '22 år - Afventer faglig vurdering'")
+        raise BusinessError("Borger har ikke en aftale med aftaletype 'Z - 22 år - Borger fyldt 22 år'")
 
     if len(citizen_bookings) > 1:
         raise BusinessError("Borgeren har mere end 1 aftale med aftaletype 'Z - 22 år - Borger fyldt 22 år'!")
@@ -45,7 +45,6 @@ def _find_citizen_aftale(db_handler: SolteqTandDatabase, cpr: str):
         WHERE
             cpr = ?
             AND Description = 'Z - 22 år - Borger fyldt 22 år'
-            AND Status = '630'
         ORDER BY
             CreatedDateTime DESC
     """
